@@ -119,8 +119,30 @@
 % When topics are long, it may be desirable to put a \newpage or a
 % \clearpage before each Topic environment
 %\newpage
-\begin{Topic}[Image Capture \Roman{TopicCounter}]
+\begin{Topic}[Image Displays \Roman{TopicCounter}]
+\subsection{Perceptual Issues in Graphics}
 
+In many computer graphics techniques, we can get away with approximations without people noticing. This allows us to save space and/or time.
+Examples:
+
+\begin{itemize}
+\item level of detail (meshes lecture 11)
+\item shading (if X is smooth, then we can sample \& interpolate)
+\item environment mapping (we are not able to judge the correctness of mirror reflections)
+\end{itemize}
+
+How can one quantify the differences that people can detect?
+
+\subsection{Intensity Discrimination}
+\begin{itemize}
+\item taste: sweetness (\# ml of sugar dissolved into water), saltiness, spiciness, etc.
+\item hearing (dB): loudness, frequency
+\item touch: pressure, weight
+\item vision: brightness, hue, saturation
+\end{itemize}
+
+\subsection{Just Noticable Difference (JND)}
+So how small a difference can you really notice? JNDs are typically non-linear functions of the intensity. The ``just noticeable difference'' in intensity is proportional to the intensity.
 
 \end{Topic}
 
