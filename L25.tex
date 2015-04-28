@@ -142,7 +142,95 @@ How can one quantify the differences that people can detect?
 \end{itemize}
 
 \subsection{Just Noticable Difference (JND)}
-So how small a difference can you really notice? JNDs are typically non-linear functions of the intensity. The ``just noticeable difference'' in intensity is proportional to the intensity.
+So how small a difference can you really notice? JNDs are typically non-linear functions of the intensity.
+
+\subsubsection{Weber's Law}
+The ``just noticeable difference'' in intensity is:
+
+$$\Delta \text{intensity} = \text{constant} * \text{intensity}$$
+
+\subsubsection{Fechner Law}
+
+Connects physical intensity with perceived intensity. Do so via questioning people how they perceive things. How do you measure perceived intensity?
+
+$$\Delta \text{perceived intensity} = k \frac{\Delta I}{I}$$
+$$ \text{perceived intensity} (I) = k \ln(\frac{I}{I_0})$$
+
+\subsection{Example: intensity of light}
+Choose $N=10$ neutral (R = G = B) values of intensity such that they appear uniformly spaced, or equally discriminable. Basically give a grey-scale colour palate and have people choose colours that they think are equal steps in intensity from black to white. Such an experiment allows us to connect perceived intensity with physical intensity. From Fechner's law, we would expect perceived intensity to grow with log of physical intensity.
+
+\subsubsection{Steven's Law}
+
+S.S. Stevens wrote paper ``To Honor Fechner and Repeal His Law''\footnote{\url{http://sonify.psych.gatech.edu/~walkerb/classes/perception/readings/Stevens1961.pdf}}: ``A power function, not a log function, describes the operating characteristic of a sensory system''.
+
+$$ \text{perceived I} = (physical I)^\gamma$$
+
+$\gamma$ shown to be about $\frac{1}{3}$
+
+One standard model for vision is that perceived intensity (``brightness'') is related to physical intensity by approximately a power law.\footnote{\url{http://en.wikipedia.org/wiki/Lab_color_space}} We are more sensitive to changes in physical intensity at small values of intensity. i.e. the JND's are smaller at small intensity values. For example, you can tell apart 1 versus 2 pounds easily as opposed to 101 and 102 pounds.
+
+Compressive non-linearity of camera capture is consistent with the laws of Weber/ Fechner/Stevens. The encoding of physical intensity is more precise at small intensities than at large intensities.
+
+\subsection{Gamma Encoding (Power Law)}
+
+\subsubsection{Film Cameras}
+Until 2005 (first year digital cameras outsold film cameras), most cameras used film. The film response function was a compressive non-linearity, namely the opacity of the film varied as a power law with the exposure. The exponent was typically called $\gamma$ but we will say $1/\gamma$ to be consistent with how we use $\gamma$ later.
+
+\subsubsection{Digital cameras (two step encoding)}
+First, encode with linear response, 12 bits per RGB channel (RAW). Second, convert from RAW to JPEG or TIFF, 8 bits per RGB value. JPEG and TIFF use a compressive non-linearity, namely a power law with an exponent $1/\gamma = 1 / 2.2$ . We refer to it as ``gamma encoding''.\footnote{\url{http://www.cambridgeincolour.com/tutorials/gamma-correction.htm}} So the camera captures more information than our image formats and so results in information thrown away.
+
+\subsubsection{What does gamma encoding achieve?}
+Consider a scene such that part of it is in shadow and part is in direct sunlight. If you were in the real scene (very HDR), you would be able to discriminate small intensity differences within the shadow region (because of Weber/Fechner/Stevens laws). Log mapping the HDR image also enables us to discriminate the intensities of the corresponding points in an LDR displayed image.
+
+\subsection{Gamma Expansion}
+Most monitors and projectors emit an RGB intensity (to be more precise, they emit RGB spectra) at each pixel that is power function of the pixel RGB value, namely they raise the value to an exponent $\gamma$. Often $\gamma = 2.2$ but for older CRT's $\gamma = 2.5$. The gamma expansion cancels the gamma compression, if one is indeed exactly the inverse of the other. (In practice, the two models are only approximately gamma power laws, so they don't exactly cancel).
+
+So the process goes kind of as follows:
+\begin{itemize}
+\item Scene Luminance (physical) to
+\item RAW $I_{RGB}$ (12-bit) to
+\item JPG $I_{RGB}$ (8-bit) to
+\item displayed spectrum (physical)
+\end{itemize}
+
+\subsubsection{Gamma correction}
+What happens when we display an image rendered with OpenGL ?
+
+The monitor's built-in gamma expansion now creates a problem since there is no need for it.
+
+To guard against the gamma expansion for rendered images, we must apply a compressive non-linearity to the rendered RGB values before they are sent to the monitor. That will cancel out monitor's gamma expansion. This is called \textbf{gamma correction}, since now we are cancelling out the monitor's gamma. Gamma correction is done using a lookup table (LUT) on the graphics card.
+
+So the sequence now goes:
+
+\begin{itemize}
+\item rendered pixel value $I_{RGB}$ to
+\item $I_{RGB}^{1/\gamma}$ (gamma encoding)
+\item $k_{RGB} I_{RGB}^{\gamma}$ (monitor, physical intensity)
+\end{itemize}
+
+\subsection{Display Calibration}
+
+\subsubsection{Display Calibration 1 (with photometer)}
+
+These power laws are very nice, but they are just models. Real affordable commercial physical devices are not required to satisfy the model, and so they typically don't. Suppose you would like your monitor (or projector) to produce linear intensities, that is, you would like the physical light intensity that is emitted to be roughly proportional to the image RGB values. To do this, we need to measure the monitor's gamma (or approximate gamma) and correct for it. \textbf{Monitor calibration} refers measurement of the curve.
+
+Case 1: Suppose you have a light measurement instrument that can measure the intensity of emitted light very accurately. This instrument is called a ``photometer''. Set the colour LUT to be linear, and then measure the intensities of uniform intensity (RGB) patches. We can fit a curve (e.g. approximately a gamma power law) to the measured intensities. e.g. the fitted curve could be a piecewise linear approximation. We can do gamma correction by setting the values in the LUT to be the inverse of this fitted curve.
+
+\subsubsection{Display Calibration 2 (without photometer)}
+\begin{center}
+\includegraphics[scale=0.25]{images/calibration_image}
+\end{center}
+Display a pattern such as above. The left side shows alternating intensities and the right a grey solid colour. Move way back from the display so that the individual lines cannot be seen i.e. they blur together. Adjust the intensity on the right until its intensity appears the same as the (blurred single) intensity on the left. Each line on the left should be a single row in the image. It has been expanded to thick lines for illustration purposes only. What this does is that whatever the two physical intensities on the left are, the average of the two intensities can be matched by setting some RGB level for a uniform patch.
+
+Repeat the interpolation between new values. Same as on previous slide but now the grid on the left consists of two new $I_{RGB}$ values. Each new point on the curve gives an $I_{RGB}$ value that produces a physical intensity halfway between two other intensities. This gives us the end-to-end mapping of the display (RGB value to emitted intensity). As in the case where had a photometer, put the inverse of this mapping into the LUT. This linearises the end-to-end mapping.
+
+All of our problems solved? Unfortunately not. Real displays still have limited dynamic range. Why? One fundamental problem is that ``black'' is not black, since there is typically ambient light in the scene that reflects off the display and effectively adds light to the points that are supposed to be black. This reflected light can be accounted for in the calibration, but it still reduces the dynamic range.
+
+\subsection{limitations of global tone mapping operators}
+Display technologies require that the mapping from digital RGB to emitted physical intensity is the same for all pixels. However, in human vision, perceived intensity can depend on spatial context. ``Global'' tone mapping operators (such as log & gamma) use the same mapping for all pixels. Many ``local'' tone mapping operators (HDR -> LDR) also have been proposed that are based on such spatial dependencies.
+
+The goal is to increase the perceived dynamic range of the displayed image. It is important to keep in mind that visual system's ultimate purpose is not to perceive brightness. Rather, it is to perceive surfaces (materials and shapes) and 3D spatial relationships, and to recognize objects and events. Sometimes our perception of brightness is deeply intermingled with out perception of other scene properties (materials, shapes, opacities).
+
 
 \end{Topic}
 

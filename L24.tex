@@ -177,7 +177,7 @@ When you increase the distance (f) to the sensor plane, then you have a ``teleph
 Image intensity also depends on this factor. Typical $t = \frac{1}{2}, \frac{1}{4}, \frac{1}{8}, \dots$, so shutter speeds $=2, 4, 8, \dots$. Shutter speed affects motion blur. There are some subtle features of motion blur however, demonstrated with billiards by Cook et al. (1984)\footnote{\url{http://graphics.pixar.com/library/DistributedRayTracing/paper.pdf}}.
 
 \subsubsection{Exposure}
-Exposure is a non-linear transformation $T(E(x,y)*t)=\{0, 1, \dots, 255\}$ and it saturates at 255. As we will see, it is useful to re-draw camera response curve as a function of log exposure.
+Exposure is a non-linear transformation $T(E(x,y)*t)=\{0, 1, \dots, 255\}$ and it saturates at 255. As we will see, it is useful to re-draw camera response curve as a function of log exposure: ``Compressive non-linearity''.
 \begin{center}
 \includegraphics[scale=0.25]{images/exposure_graph}
 \includegraphics[scale=0.25]{images/dynamic_ranges}
